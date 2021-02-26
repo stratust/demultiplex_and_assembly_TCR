@@ -1,0 +1,13 @@
+# Global
+OUTPUTDIR: 'results'
+DATADIR: 'data'
+
+# Barcode files
+PLATE_BARCODES: 'database/barcodes_files/plate_barcodes.txt'
+ROW_BARCODES: 'database/barcodes_files/row_barcode.txt'
+COLUMN_BARCODES: 'database/barcodes_files/column_barcode.txt'
+
+# PhiX
+PHIX_GENOME_REF: 'database/phix_genome/phi-X174_NC_001422.fasta'
+
+

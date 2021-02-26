@@ -1,0 +1,8 @@
+TAAGC	Row_A
+TGCAC	Row_B
+CTCAG	Row_C
+GGAAT	Row_D
+CGAGG	Row_E
+AGGAG	Row_F
+TGTTG	Row_G
+CAACT	Row_H

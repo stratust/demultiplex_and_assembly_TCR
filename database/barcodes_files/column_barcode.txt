@@ -1,0 +1,12 @@
+GTTCA	Column_1
+CAGGA	Column_2
+TTATA	Column_3
+CCTGT	Column_4
+ACCGC	Column_5
+ACTTA	Column_6
+GCTAG	Column_7
+GACGT	Column_8
+GGCTA	Column_9
+GAATG	Column_10
+CCAAC	Column_11
+GAGAC	Column_12
