@@ -10,4 +10,5 @@ COLUMN_BARCODES: 'database/barcodes_files/column_barcode.txt'
 # PhiX
 PHIX_GENOME_REF: 'database/phix_genome/phi-X174_NC_001422.fasta'
 
-
+# Samplesheet
+SAMPLESHEET: 'database/samplesheet/LIB20211019_barcodeTable.csv'

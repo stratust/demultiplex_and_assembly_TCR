@@ -26,6 +26,7 @@ rule run_all:
         plate_barcode = config['PLATE_BARCODES'],
         row_barcode = config['ROW_BARCODES'],
         column_barcode = config['COLUMN_BARCODES'],
+        samplesheet_file = config['SAMPLESHEET'],
         output_folder = CWD + '/' + OUTPUTDIR + '/demultiplexed_data/'
     shell:
         """
@@ -33,6 +34,7 @@ rule run_all:
             --plate_barcode_file {params.plate_barcode} \
             --row_barcode_file {params.row_barcode} \
             --column_barcode_file {params.column_barcode} \
+            --samplesheet_file {params.samplesheet_file}\
             --fastq_file_r1 {input[0]} \
             --fastq_file_r2 {input[1]} \
             --output_folder {params.output_folder}

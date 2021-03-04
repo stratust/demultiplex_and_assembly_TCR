@@ -2,6 +2,7 @@
 package MyApp {
     use MooseX::App qw(Color);
     use Log::Any '$log';
+    use MooseX::FileAttribute;
 
     has 'log' => (
         is            => 'ro',
@@ -69,6 +70,22 @@ package MyApp::Foo {
     );
 
 
+    has_file 'samplesheet_file' => (
+        traits        => ['AppOption'],
+        cmd_type      => 'option',
+        required      => 1,
+        documentation => q[Very important option!],
+    );
+
+
+    has 'samplesheet_hash' => (
+        is      => 'ro',
+        isa     => 'HashRef',
+        lazy    => 1,
+        builder => '_build_samplesheet_hash'
+    );
+
+
     has 'plate_barcode' => (
         is      => 'ro',
         isa     => 'HashRef',
@@ -106,6 +123,53 @@ package MyApp::Foo {
         my $z = IO::Compress::Gzip->new($file, {AutoClose => 1}) or die "gzip failed: $GzipError\n";
         my $out = Bio::SeqIO->new(-fh => $z, -format => 'fastq');
         return $out;
+    }
+
+
+    sub _build_samplesheet_hash {
+        my ( $self ) = @_;
+        my %samplesheet_hash;
+
+        open( my $fh, '<', $self->samplesheet_file->stringify );
+        my $header = <$fh>;
+        $header =~ s/[\n\r]$//g;
+
+        if ( $header =~ m/^.*sequence_name.*Plate.*Row.*Column.*/ ) {
+
+            my $plate_barcodes_hash_ref  = $self->plate_barcode;
+            my $row_barcodes_hash_ref    = $self->row_barcode;
+            my $column_barcodes_hash_ref = $self->column_barcode;
+
+            while ( my $row = <$fh> ) {
+                # chomp $row;
+                $row =~ s/[\n\r]$//g;
+                my @split_row = split( ",", $row );
+
+                my $sequence_name  = $split_row[0];
+                my $chain  = $split_row[1];
+                my $plate_barcode  = $split_row[2];
+                my $row_barcode    = $split_row[3];
+                my $column_barcode = $split_row[4];
+
+                if ( $plate_barcodes_hash_ref->{$plate_barcode} and $row_barcodes_hash_ref->{$row_barcode} and $column_barcodes_hash_ref->{$column_barcode}  ) {
+                    $samplesheet_hash{  $plate_barcodes_hash_ref->{$plate_barcode} .'_'.  $row_barcodes_hash_ref->{$row_barcode} . '_' . $column_barcodes_hash_ref->{$column_barcode} } = $plate_barcodes_hash_ref->{$plate_barcode} .'_'. $sequence_name . '_' . $chain;
+                } else {
+                    my $msg = "Barcodes in the samplesheet are not matching with the barcodes in the barcode files";
+                    p $msg;
+                    die;
+                }
+
+            }
+
+        }
+        else {
+            my $msg = "ERROR: Barcodes are not in the expected order !!";
+            p $msg;
+            die;
+        }
+
+
+        return ( \%samplesheet_hash );
     }
 
 
@@ -227,7 +291,7 @@ package MyApp::Foo {
         my $plate_barcodes_hash_ref  = $self->plate_barcode;
         my $row_barcodes_hash_ref    = $self->row_barcode;
         my $column_barcodes_hash_ref = $self->column_barcode;
-
+        my $samplesheet_hash_ref = $self->samplesheet_hash;
 
         my $output_dir = $self->output_folder->stringify;
         # my $output_dir = $self->output_folder->stringify . "/demultiplexed_data";
@@ -254,6 +318,11 @@ package MyApp::Foo {
                 my $output_r1_filename = $output_dir . "/" . $info_plate_r1 . "_" . $info_row_r1 . "_" . $info_column_r2 . "_L001_R1_001.fastq";
                 my $output_r2_filename = $output_dir . "/" . $info_plate_r1 . "_" . $info_row_r1 . "_" . $info_column_r2 . "_L001_R2_001.fastq";
 
+                if ( $samplesheet_hash_ref->{ $info_plate_r1 . "_" . $info_row_r1 . "_" . $info_column_r2 }  ) {
+                    $output_r1_filename = $output_dir . "/" . $samplesheet_hash_ref->{ $info_plate_r1 . "_" . $info_row_r1 . "_" . $info_column_r2 } . "_L001_R1_001.fastq";
+                    $output_r2_filename = $output_dir . "/" . $samplesheet_hash_ref->{ $info_plate_r1 . "_" . $info_row_r1 . "_" . $info_column_r2 } . "_L001_R2_001.fastq";
+                }
+
 #                 my $out1 = $self->create_output_fastq( $output_r1_filename );
                 # my $out2 = $self->create_output_fastq( $output_r2_filename );
 
@@ -267,9 +336,14 @@ package MyApp::Foo {
             elsif ( ( ( !$info_plate_r1 and !$info_row_r1 ) and !$info_column_r2 )
                 and ( ( $info_plate_r2 and $info_row_r2 ) and ( $info_column_r1 ) ) )
             {
+
                 my $output_r1_filename = $output_dir . "/" . $info_plate_r2 . "_" . $info_row_r2 . "_" . $info_column_r1 . "_L001_R1_001.fastq";
                 my $output_r2_filename = $output_dir . "/" . $info_plate_r2 . "_" . $info_row_r2 . "_" . $info_column_r1 . "_L001_R2_001.fastq";
+                if ( $samplesheet_hash_ref->{ $info_plate_r2 . "_" . $info_row_r2 . "_" . $info_column_r1 }  ) {
+                    $output_r1_filename = $output_dir . "/" . $samplesheet_hash_ref->{ $info_plate_r2 . "_" . $info_row_r2 . "_" . $info_column_r1 } . "_L001_R1_001.fastq";
+                    $output_r2_filename = $output_dir . "/" . $samplesheet_hash_ref->{ $info_plate_r2 . "_" . $info_row_r2 . "_" . $info_column_r1 } . "_L001_R2_001.fastq";
 
+                }
 #                 my $out1 = $self->create_output_fastq( $output_r1_filename );
                 # my $out2 = $self->create_output_fastq( $output_r2_filename );
 
@@ -306,8 +380,11 @@ package MyApp::Foo {
 
     }
 
+
     __PACKAGE__->meta->make_immutable;
 }
+
+
 
 use MyApp;
 use Log::Any::App '$log', -screen => 1;    # turn off screen logging explicitly
