@@ -26,3 +26,9 @@ Execute Snakemake with
 ```
 snakemake -j <number_of_cores>
 ``` 
+
+======
+
+An RMarkdown report was created for custom analysis. File paths are hardcoded, code adaptations is necessary.
+
+File available in [GitHub Gist](https://gist.github.com/victor-ramos/55d72221e31d0bbee9861ba67c2c488a)
