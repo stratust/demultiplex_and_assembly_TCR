@@ -30,14 +30,7 @@ package MyApp::Foo {
     command_short_description q[This command is awesome];
     command_long_description q[This command is so awesome, yadda yadda yadda];
 
-    has_file 'fastq_file_r1' => (
-        traits        => ['AppOption'],
-        cmd_type      => 'option',
-        required      => 1,
-        documentation => q[Very important option!],
-    );
-
-    has_file 'fastq_file_r2' => (
+    has_file 'fastq_file' => (
         traits        => ['AppOption'],
         cmd_type      => 'option',
         required      => 1,
@@ -221,8 +214,7 @@ package MyApp::Foo {
     sub demultiplex_fastq {
         my ( $self ) = @_;
 
-        my $fastq_r1 = $self->read_fastq( $self->fastq_file_r1->stringify );
-        my $fastq_r2 = $self->read_fastq( $self->fastq_file_r2->stringify );
+        my $fastq = $self->read_fastq( $self->fastq_file->stringify );
 
         my $plate_barcodes_hash_ref  = $self->plate_barcode;
         my $row_barcodes_hash_ref    = $self->row_barcode;
@@ -233,10 +225,9 @@ package MyApp::Foo {
         # my $output_dir = $self->output_folder->stringify . "/demultiplexed_data";
         make_path( $output_dir );
 
-        while ( my $r1 = $fastq_r1->next_seq ) {
-            p $r1->id;
+        while ( my $r1 = $fastq->next_seq ) {
 
-            my $r2 = $fastq_r2->next_seq;
+            my $r2 = $fastq->next_seq;
             my ( $info_plate_r1,  $info_plate_r2 );
             my ( $info_row_r1,    $info_row_r2 );
             my ( $info_column_r1, $info_column_r2 );
@@ -292,8 +283,6 @@ package MyApp::Foo {
 
                 $out1->write_seq( $r1 );
                 $out2->write_seq( $r2 );
-
-
             }
         }
     }
