@@ -17,16 +17,14 @@ BBMERGE_OUTPUT = list(
                 )
             )
 
-print(BBMERGE_OUTPUT)
+container: "docker://condaforge/mambaforge:4.13.0-1"
 
 rule run_all:
     input: BBMERGE_OUTPUT
     output: OUTPUTDIR + '/bbmerge/done.txt'
     shell:
         """
-
             touch {output}
-
         """
 
 rule run_bbmerge:
@@ -43,6 +41,8 @@ rule run_bbmerge:
         unmerged_r2 = OUTPUTDIR+"/bbmerge/{sample}/{sample}_L{lane}_R2_unmerged.fastq",
         merged_unsorted=OUTPUTDIR+"/bbmerge/{sample}/{sample}_L{lane}_merged_unsorted.fastq.gz",
         merged_unzipped=OUTPUTDIR+"/bbmerge/{sample}/{sample}_L{lane}_merged.fastq"
+    conda:
+        "../envs/bbmap.yaml"
     shell:
         """
             _JAVA_OPTIONS="-XX:ParallelGCThreads=1 -XX:+UseParallelGC"  bbmerge-auto.sh -Xmx{resources.mem_mb}M \
@@ -56,5 +56,4 @@ rule run_bbmerge:
             gunzip -c {params.merged_unsorted} | fastq-sort --id > {params.merged_unzipped}
 
             gzip {params.merged_unzipped}
-
         """

@@ -1,0 +1,4 @@
+channels:
+  - bioconda
+dependencies:
+  - trust4=1.0.7

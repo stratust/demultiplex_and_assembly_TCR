@@ -17,9 +17,9 @@ FILTERED_FASTQ = list(
             )
 
 
-print(FILTERED_FASTQ)
+container: "docker://condaforge/mambaforge:4.13.0-1"
 
-rule run_all:
+rule demultiplex_samples_using_plate_and_wells_barcodes:
     input: FILTERED_FASTQ
     output: OUTPUTDIR + '/PhiX_Removal/done.txt'
     params:
@@ -28,6 +28,8 @@ rule run_all:
         column_barcode = config['COLUMN_BARCODES'],
         output_folder = CWD + '/' + OUTPUTDIR + '/demultiplexed_data/'
     threads: 256
+    conda:
+        "../envs/perl.yaml"
     shell:
         """
             rm -rf {params.output_folder}
@@ -50,7 +52,6 @@ rule run_all:
             find {params.output_folder} -iname "*.fastq" | parallel -j {threads} --bar "gzip {{}}"
 
             touch {output}
-
         """
 
 rule remove_phix:
@@ -62,6 +63,8 @@ rule remove_phix:
     threads: 10
     resources:
         mem_mb=8000
+    conda:
+        "../envs/bbmap.yaml"
     shell:
         """
             _JAVA_OPTIONS="-XX:ParallelGCThreads=1 -XX:+UseParallelGC" bbduk.sh -Xmx{resources.mem_mb}M \

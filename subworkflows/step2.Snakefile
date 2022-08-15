@@ -28,17 +28,14 @@ TRIMGALORE_OUTPUT_R2 = list(
                 )
             )
 
-
-print([TRIMGALORE_OUTPUT_R1, TRIMGALORE_OUTPUT_R2])
+container: "docker://condaforge/mambaforge:4.13.0-1"
 
 rule run_all:
     input: [TRIMGALORE_OUTPUT_R1, TRIMGALORE_OUTPUT_R2]
     output: OUTPUTDIR + '/QC/done.txt'
     shell:
         """
-
             touch {output}
-
         """
 
 rule run_trim_galore:
@@ -52,6 +49,8 @@ rule run_trim_galore:
         output_dir=OUTPUTDIR+'/QC/{sample}'
     threads: 10
     log: CWD + '/results/QC/{sample}/{sample}_L{lane}_trim_galore.log'
+    conda:
+        "../envs/trim_galore.yaml"
     shell:
         """
             _JAVA_OPTIONS='' trim_galore --paired \

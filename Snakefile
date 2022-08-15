@@ -16,7 +16,7 @@ subworkflow step_three:
 subworkflow step_four:
     snakefile: 'subworkflows/step4.Snakefile'
 
-
+container: "docker://continuumio/miniconda3:4.12.0"
 
 rule all_subworkflows:
     input:

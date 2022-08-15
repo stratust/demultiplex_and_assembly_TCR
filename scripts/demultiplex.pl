@@ -21,7 +21,6 @@ package MyApp::Foo {
     use MooseX::FileAttribute;
     use IO::Uncompress::AnyUncompress qw(anyuncompress $AnyUncompressError);
     use namespace::autoclean;
-    use Data::Printer;
     use File::Find::Rule;
     use Bio::SeqIO;
     use File::Path qw(make_path);
@@ -299,6 +298,5 @@ package MyApp::Foo {
 }
 
 use MyApp;
-use Log::Any::App '$log', -screen => 1;    # turn off screen logging explicitly
 MyApp->new_with_command->run();
 
