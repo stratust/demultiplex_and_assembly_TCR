@@ -21,11 +21,18 @@ CSV and FASTQ files for each library available in [this link](https://www.dropbo
 Clone [TRUST4](https://github.com/liulab-dfci/TRUST4) to the main directory
 
 (4)
-Execute Snakemake with 
+Execute Snakemake with singularity and conda:
 
 ```
-snakemake -j <number_of_cores>
+snakemake -j <number_of_cores> --use-conda --use-singularity
 ``` 
+
+Add additional arguments to singularity if necessary:
+
+```
+snakemake -j <number_of_cores> --use-conda --use-singularity --singularity-args "-B /data04-scratch:/data04-scratch"
+```
+
 
 ======
 
